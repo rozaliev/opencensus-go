@@ -15,6 +15,7 @@
 package ochttp
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/url"
@@ -128,6 +129,25 @@ func (t *traceTransport) CancelRequest(req *http.Request) {
 
 func spanNameFromURL(u *url.URL) string {
 	return u.Path
+}
+
+func spanNameFromCtxOrURL(ctx context.Context, u *url.URL) string {
+	if name := SpanNameFromContext(ctx); name != "" {
+		return name
+	}
+
+	return u.Path
+}
+
+type spanNameKey struct{}
+
+func SpanNameFromContext(ctx context.Context) string {
+	name, _ := ctx.Value(spanNameKey{}).(string)
+	return name
+}
+
+func SpanNameToContext(ctx context.Context, name string) context.Context {
+	return context.WithValue(ctx, spanNameKey{}, name)
 }
 
 func requestAttrs(r *http.Request) []trace.Attribute {

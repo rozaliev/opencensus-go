@@ -81,8 +81,8 @@ func (h *Handler) startTrace(w http.ResponseWriter, r *http.Request) (*http.Requ
 		SpanKind: trace.SpanKindServer,
 	}
 
-	name := spanNameFromURL(r.URL)
 	ctx := r.Context()
+	name := spanNameFromCtxOrURL(ctx, r.URL)
 	var span *trace.Span
 	sc, ok := h.extractSpanContext(r)
 	if ok && !h.IsPublicEndpoint {
